@@ -1,0 +1,85 @@
+var options = {mimeType: 'video/webm;codecs=vp9'};
+if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+    console.log(options.mimeType + ' is not Supported');
+    options = {mimeType: 'video/webm;codecs=vp8'};
+    if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+      console.log(options.mimeType + ' is not Supported');
+      options = {mimeType: 'video/webm'};
+      if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+	console.log(options.mimeType + ' is not Supported');
+	options = {mimeType: ''};
+      }
+    }
+  }
+
+mediaRecorder = new MediaRecorder(window.stream, options);
+mediaRecorder.onstop = 스탑핸들러;
+mediaRecorder.ondataavailable = handleDataAvailable;
+mediaRecorder.start(10); // collect 10ms of data
+
+var recordedBlobs;  //동영상이 저장된 데이터
+
+function handleDataAvailable(event){
+	if (event.data && event.data.size > 0) {
+	    recordedBlobs.push(event.data);
+	  }
+}
+function play(){
+	var superBuffer = new Blob(recordedBlobs, {type: 'video/webm'});
+	Video.src = window.URL.createObjectURL(superBuffer); //비디오 재생
+}
+function download(){
+	var blob = new Blob(recordedBlobs, {type: 'video/webm'});
+	var url = window.URL.createObjectURL(blob);
+
+	var a = document.createElement('a');
+	  a.style.display = 'none';
+	  a.href = url;
+	  a.download = 'test.webm';     //다운로드할 파일명.
+	  document.body.appendChild(a);
+	  a.click();
+
+	  setTimeout(function() {
+	    document.body.removeChild(a);
+	    window.URL.revokeObjectURL(url);
+	  }, 100);
+
+
+	  //폼데이터로 전송방법
+	  var fd = new FormData();
+	  fd.append('fname', 'test.wav');
+	  fd.append('data', blob);
+	  $.ajax({
+	      type: 'POST',
+	      url: '20161122_post.php',
+	      data: fd,
+	      processData: false,
+	      contentType: false
+	  }).done(function(data) {
+		 console.log(data);
+		 alert('done');
+	  });
+}
+
+
+var constraints = {
+  audio: true,
+  video: false
+};
+navigator.mediaDevices.getUserMedia(constraints).
+    then(handleSuccess).catch(handleError);
+
+    function handleSuccess(stream) {
+  console.log('getUserMedia() got stream: ', stream);
+  window.stream = stream;
+  webcamstream = stream;
+  if (window.URL) {
+    gumVideo.src = window.URL.createObjectURL(stream);
+  } else {
+    gumVideo.src = stream;
+  }
+}
+
+function handleError(error) {
+  console.log('navigator.getUserMedia error: ', error);
+}

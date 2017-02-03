@@ -1,0 +1,20 @@
+deffered 사용법  ( 참고 http://blog.naver.com/yanggun7201/220755950595 ) 
+
+ajax가 들어있는 function 안에서 $.Deferred() 를 생성하고, 바로 반환하는값은 deffered객체 ,ajax결과반환후에 resolve한다.
+
+function ajaxfunction(){
+	var deferred = $.Deferred();
+
+	$.ajax{
+	  -----
+	  -----
+	  결과가 리턴되면
+	   deferred.resolve();
+	}
+	return deferred;
+}
+var deferreds = [];
+deferreds.push(  ajaxfunction()   );
+$.when.apply($,deferreds).then( function(){
+	//ajax콜이 종료된후에 실행됨
+});
