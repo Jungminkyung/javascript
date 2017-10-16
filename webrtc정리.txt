@@ -83,3 +83,7 @@ navigator.mediaDevices.getUserMedia(constraints).
 function handleError(error) {
   console.log('navigator.getUserMedia error: ', error);
 }
+
+
+//not exec
+//can http://itskeleton.tistory.com/archive/20170627
