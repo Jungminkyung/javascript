@@ -87,3 +87,29 @@ function handleError(error) {
 
 //not exec
 //can http://itskeleton.tistory.com/archive/20170627
+
+
+webrtc echo cancellation ( Optimized AEC (Acoustic Echo Cancellation) ) 
+ - 녹음하는데 들어가는 소리가 스피커를 통해 나오게 되고, 그소리가 다시 입력으로 들어가는 무한반복으로 노이즈가 생기는것을 제거
+ helpsites
+  https://w3c.github.io/mediacapture-main/#widl-MediaTrackConstraints-echoCancellation
+  https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackSettings/echoCancellation
+  https://github.com/webrtc/samples
+  https://webrtc.org/blog/2011/07/11/webrtc-improvement-optimized-aec-acoustic-echo-cancellation.html
+ 
+ results
+  var audioDefaultConstraintString = {  
+   "sampleSize": 16,
+   "channelCount": 2,
+   "echoCancellation": true};
+ 
+  var constraints = {
+      audio: audioDefaultConstraintString,
+      video: true
+    };
+    
+  video.volume = 0;
+  video.muted = 0;
+  
+  
+  
