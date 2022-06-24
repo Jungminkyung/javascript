@@ -1,0 +1,69 @@
+var fd = new FormData();
+        fd.append('textall', textall);
+        var startTime, endTime, duration, remainduration;
+        startTime = (new Date()).getTime();
+        var xhr2 = $.ajax({
+            type: 'POST',
+            url: './ajax/networkspeed.ajax.php',
+            data: fd,
+            processData: false,
+            contentType: false,
+            xhr: function () {
+                var xhr = new window.XMLHttpRequest();
+                //Upload progress
+                xhr.upload.addEventListener("progress", function (evt) {
+                    if (evt.lengthComputable) {
+                        endTime = (new Date()).getTime();
+                        duration = (endTime - startTime);
+                        var percentComplete = evt.loaded / evt.total;
+                        var percentnumber = Math.floor(percentComplete * 100);
+                        console.log(percentnumber, 'percentnumber');
+                        console.log(evt.loaded, 'evt.loaded');
+                        _networkspeed.upload_draw(percentnumber,evt.loaded,duration);
+                        console.log('draw');
+
+                    }
+                }, false);
+                //Download progress
+                xhr.addEventListener("progress", function (evt) {
+                    if (evt.lengthComputable) {
+                        endTime = (new Date()).getTime();
+                        duration = (endTime - startTime);
+                        var percentComplete = evt.loaded / evt.total;
+                        var percentnumber = Math.floor(percentComplete * 100);
+                        console.log(percentnumber, 'percentnumber');
+                        console.log(evt.loaded, 'evt.loaded');
+                        _networkspeed.download_draw(percentnumber,evt.loaded,duration);
+                    }
+                }, false);
+                return xhr;
+            },
+        }).done(function(data) {
+            //calcing_off();
+            var x = data;
+            console.log(x,'networkspeed.ajax.php');
+            if(x=='' || x==undefined || x=='null' || x==null) {
+                return;
+            }
+            var xp = jQuery.parseJSON(x);
+            console.log(xp,' networkspeed.ajax.php');
+            if(xp['result'] == '0'){
+                alert(xp['resulttext']);
+            }
+            else if(xp['result'] == '1'){
+                //alert('success');
+            }
+        });
+        setTimeout(function(){
+            xhr2.abort();
+        },10000);
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
