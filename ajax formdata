@@ -1,0 +1,69 @@
+var fd = new FormData();
+        var blob = new Blob(recordedBlobs, { type: 'video/mp4' });
+
+        fd.append('fname', 'record_<?=rand(111111,999999)?>_<?=$time?>.mp4');
+        fd.append('data', blob);
+        fd.append('targetseq','<?=$targetseqenc?>');
+        fd.append('homeworkseq','<?=$homeworkseqenc?>');
+        fd.append('startposition','<?=$startposition?>');
+        fd.append('startdate',startdate);
+        fd.append('enddate',enddate);
+        fd.append('answersetseq','<?=$answersetseq?>');
+        fd.append('qu','<?=$quseq?>');
+        fd.append('questiontype','movie');
+        fd.append('recordingtime',recordingTimeRaiseup);
+
+        $('#recordstopbtn').css('display','none');
+        $.ajax({
+            type: 'POST',
+            url: './invite5_6_post.html',
+            data: fd,
+            processData: false,
+            contentType: false,
+            xhr: function () {
+                var xhr = new window.XMLHttpRequest();
+                //Upload progress
+                xhr.upload.addEventListener("progress", function (evt) {
+                    if (evt.lengthComputable) {
+                        var percentComplete = evt.loaded / evt.total;
+                        var percentnumber = Math.floor(percentComplete * 100);
+                        //Do something with upload progress
+                        console.log(percentnumber, 'percentnumber');
+                        $("#uploadMeter").attr("data-percent", percentnumber);
+                        $("#uploadMeter").data("percent", percentnumber);
+                        $("#uploadMeter").empty();
+                        $("#uploadMeter").gaugeMeter();
+                    }
+                }, false);
+                //Download progress
+                xhr.addEventListener("progress", function (evt) {
+                    if (evt.lengthComputable) {
+                        var percentComplete = evt.loaded / evt.total;
+                        //Do something with download progress
+                        //console.log(percentComplete,'download');
+                    }
+                }, false);
+                return xhr;
+            },
+        }).done(function(data) {
+            //calcing_off();
+            uploadspeedcheck_end(data);
+            var x = data;
+            console.log(x);
+            if(x=='' || x==undefined || x=='null' || x==null)
+                return;
+            var xp = jQuery.parseJSON(x);
+            console.log(xp);
+            if(xp['result'] == '0'){
+                alert(xp['resulttext']);
+                retryview();
+            }
+            else if(xp['result'] == '1'){
+                tl('문항 : <?=$startposition?>  녹화전송성공');
+                recordsubmitok(xp['movieurl']);
+            }
+
+        }).fail(function(data) {
+            guinlog('upload fail','','','위치<?=$startposition?>(웹)','<?=$homeworkseqenc?>');
+            retryview();
+        });;
