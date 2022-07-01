@@ -1,0 +1,124 @@
+
+    /*
+    * 사각형과 텍스트. 텍스트는 정중앙에 계산해서 표시한다.
+    */
+    recttext( rectoption, text, textoption, groupoptions ) {
+        if(rectoption == undefined)
+            rectoption = {};
+        if(textoption == undefined)
+            textoption = {};
+
+        var temprect = this.rectadd( rectoption );
+
+        var rectwidth = temprect.width;
+        var rectheight= temprect.height;
+
+        var temptext = this.textadd( text, textoption);
+
+        var textwidth = temptext.aCoords.tr.x - temptext.aCoords.tl.x;
+        var textheight = temptext.aCoords.bl.y - temptext.aCoords.tl.y;
+
+
+        var textpositionx = ((rectwidth/2) - (textwidth/2)) + temprect.left ;
+        var textpositiony = (rectheight/2) - (textheight/2) + temprect.top;
+        temptext.set({
+            top: textpositiony,
+            left: textpositionx,
+        });
+
+        var tempgroup = new fabric.Group([ temprect, temptext ], groupoptions);
+        tempgroup = this.setLock(tempgroup);
+        return tempgroup;
+
+    }
+    /*
+    * 움직이지 않게 속성을 수정해준다.
+    */
+    setLock( target ) {
+        target.hasBorders = false;
+        target.hasControls = true;
+        target.lockRotation = true;
+        target.lockMovementX = true;
+        target.lockMovementY = true;
+        target.selection = false;
+        target.selectable = false;
+        return target;
+    }
+    /*
+    * Rect만들기 유틸 {left:0, top:0, width:160,  height:20, opacity:0.5, fill:'#196C65'},
+    */
+    rectadd(options) {
+        if(options == undefined)
+            options = {};
+
+        var temptext = new fabric.Rect(options);
+        temptext.hasBorders = false;
+        temptext.hasControls = false;
+        temptext.lockRotation = true;
+        temptext.lockMovementX = true;
+        temptext.lockMovementY = true;
+        return temptext;
+    }
+    /*
+    * 텍스트 만들기 유틸  
+    *  text 쓸 글자
+    *  option {left: 45, top: 120, fontFamily: 'Comic Sans', fontSize: 10, fill:'#FFFFFF', opacity:0.5}
+    *  etc  {align:'xcenter'}  추가 모드들
+    */
+    textadd(text,options, etc) {
+        if(options == undefined)
+            options = {};
+        var temptext = new fabric.Text(text,options);
+        temptext.hasBorders = false;
+        temptext.hasControls = true;
+        temptext.lockRotation = true;
+        temptext.lockMovementX = true;
+        temptext.lockMovementY = true;
+        temptext.selection = false;
+        temptext.selectable = false;
+
+
+        if(etc) {
+            if(etc.align == 'xcenter') {
+                var textwidth = temptext.aCoords.tr.x - temptext.aCoords.tl.x;
+                //320x480
+                var textpositionx = (((320 * this.widthweight )/2) - (textwidth/2)) + 0 ;
+                temptext.set({
+                    left: textpositionx,
+                });
+
+            }
+            if(etc.align == 'xcenter1/2') {
+                //가로 길이의 1/2지점에서 센터를 잡음. 가로 320일때 0~160사이의 센터.
+                var textwidth = temptext.aCoords.tr.x - temptext.aCoords.tl.x;
+                var textpositionx = (((320 * this.widthweight )/2 /2) - (textwidth/2)) + 0 ;
+                temptext.set({
+                    left: textpositionx,
+                });
+
+            }
+            if(etc.align == 'xcenter2/2') {
+                //가로 길이의 2/2지점에서 센터를 잡음. 가로 320일때 160~320사이의 센터.
+                var textwidth = temptext.aCoords.tr.x - temptext.aCoords.tl.x;
+                var textpositionx = (        ((320 * this.widthweight )/2/2) +  ((320 * this.widthweight)/2) - (textwidth/2)) + 0 ;
+                temptext.set({
+                    left: textpositionx,
+                });
+
+            }
+
+            if(etc.bottomalignTo) {
+
+                //top:relaxed.top + relaxed.height,
+                temptext.set({
+                    //top: etc.bottomalignTo.top + etc.bottomalignTo.height - temptext.height ,
+                    top: etc.bottomalignTo.top + etc.bottomalignTo.height - temptext.height ,
+                });
+            }
+        }
+        return temptext;
+    }
+    
+    
+    
+    
