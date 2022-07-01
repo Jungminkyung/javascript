@@ -1,0 +1,198 @@
+drawCoordinate() {
+
+        const scene = this.scene;
+
+        let boxWidth = 1;
+        let boxHeight = 0.1;
+        let boxDepth = 1;
+        const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
+        const loader = new THREE.TextureLoader();
+
+        let coordnateIds = [];
+
+        for(let x=0; x<=3; x++) {
+            coordnateIds[x] = [];
+            for(let z=0; z<=3; z++) {
+                coordnateIds[x][z] = 'x'+x+'y0z'+z;
+                let material = new THREE.MeshPhongMaterial({
+                    map: loader.load('./images/floor.png'),
+                    name: coordnateIds[x][z],
+                });
+                let cube = new THREE.Mesh(geometry, material);
+                cube.position.x = x;
+                cube.position.z = z;
+                cube.position.y = -0.5 + _game.yoffset;
+                scene.add(cube);
+            }
+        }
+
+        const arrowGeometry = new THREE.PlaneGeometry(0.5,0.5);
+        let arrowMaterial = new THREE.MeshPhongMaterial({
+            map: loader.load('./images/positionarrow.png'),
+            name: 'arrow',
+            transparent: true,
+            alphaTest: 0.1,
+            color: '#888888',
+            side: THREE.DoubleSide,
+        });
+        let arrowcube = new THREE.Mesh(arrowGeometry, arrowMaterial);
+        _game.arrowcube = arrowcube;
+        arrowcube.position.x = -0.1;
+        arrowcube.position.z = 3.4;
+        arrowcube.position.y = -5.49 ;
+
+
+        _game.arrow = arrowcube;
+        _game.arrow.rotation.x = 0.0;
+        _game.arrow.rotation.y = 0.94;
+        _game.arrow.rotation.z = -6;
+        scene.add(arrowcube);
+
+        requestAnimationFrame(this.render);
+    }
+    
+    
+    
+    
+    
+    addPicking() {
+        class PickHelper {
+            constructor() {
+                this.raycaster = new THREE.Raycaster();
+                this.pickedObject = null;
+                this.pickedObjectSavedColor = 0;
+            }
+            pick(normalizedPosition, scene, camera, time) {
+                // 이미 다른 물체를 피킹했다면 색을 복원합니다
+
+                if (this.pickedObject) {
+                    if(!_game.nopickingColor) {
+
+                        this.pickedObject.material.emissive.setHex(this.pickedObjectSavedColor);
+                    }
+                    this.pickedObject = undefined;
+                }
+                if(_game.isBoxAdded === true) {
+                    //console.log('already added');
+                    return;
+                }
+                // 절두체 안에 광선을 쏩니다
+                this.raycaster.setFromCamera(normalizedPosition, camera);
+                // 광선과 교차하는 물체들을 배열로 만듭니다
+                const intersectedObjects = this.raycaster.intersectObjects(scene.children);
+                if (intersectedObjects.length) {
+
+                    // 첫 번째 물체가 제일 가까우므로 해당 물체를 고릅니다
+                    this.pickedObject = intersectedObjects[0].object;
+                    // 기존 색을 저장해둡니다. emissive 색을 빨강/노랑으로 빛나게 만듭니다
+                    if(!_game.nopickingColor) {
+                        this.pickedObjectSavedColor = this.pickedObject.material.emissive.getHex();
+                        this.pickedObject.material.emissive.setHex(0xFFFF00);
+                    }
+
+                    _game.placeBlockSave = this.pickedObject;
+                    _game.placeBlockLength = intersectedObjects.length;
+                }
+                else {
+                }
+
+            }
+        }
+
+        _game.pickPosition = { x: 0, y: 0};
+        _game.clearPickPosition();
+        _game.pickHelper = new PickHelper();
+
+
+        _game.canvas.addEventListener('mousemove', _game.setPickPosition);
+        _game.canvas.addEventListener('mouseout', _game.clearPickPosition);
+        _game.canvas.addEventListener('mouseleave', _game.clearPickPosition);
+        _game.canvas.addEventListener('pointerdown', (event) => {
+            event.preventDefault();
+            console.log('pointerdown==================================================');
+            _game.pointerdown = 1;
+            _game.freezeDown = 2;
+            _game.recordStartPosition(event);
+            _game.freezeDownCheck();
+            _game.canvas.addEventListener('pointermove', _game.recordMovement);
+            _game.canvas.addEventListener('pointerup', function() {
+                _game.pointerdown = 2;
+                if(_game.freezeDown === 1) {
+                }
+                else {
+                    _game.placeNoMovement();
+                }
+            });
+        }, {passive: false});
+        _game.canvas.addEventListener('touchstart', (event) => {
+            event.preventDefault();
+            _game.pointerdown = 1;
+            _game.freezeDown = 2;
+            _game.freezeDownCheck();
+            _game.setPickPosition(event.touches[0]);
+        }, {passive: false});
+        _game.canvas.addEventListener('touchmove', (event) => {
+            _game.setPickPosition(event.touches[0]);
+        });
+        _game.canvas.addEventListener('touchend', function() {
+            _game.pointerdown = 2;
+            if(_game.freezeDown === 1) {
+
+            } else {
+                _game.clearPickPosition();
+            }
+        } );
+    }
+    
+    
+    addBoxByName(boxname) {
+        if(_game.prevAddBoxName === boxname) {
+            //console.error('same name');
+            //같은 아이디에 한번만 추가
+            _game.isBoxAdded = true;
+            return;
+        }
+        //console.log(boxname,'addbox');
+        _game.prevAddBoxName = boxname;
+        let xyz = _game.getXYZByBoxname(boxname);
+        //console.log(xyz,'xyz');
+
+        const scene = this.scene;
+
+        let boxWidth = 1;
+        let boxHeight = 1;
+        let boxDepth = 1;
+        const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
+        const loader = new THREE.TextureLoader();
+        const x = xyz['x'];
+        const y = parseInt(xyz['y'])+1;
+        const z = xyz['z'];
+        const name = 'x'+x+'y'+y+'z'+ z;
+        if(y>=4) {
+            console.log('y축은 3까지만 놓을수 있음');
+            return;
+        }
+
+        let material = new THREE.MeshPhongMaterial({
+            map: loader.load('./images/block.png'),
+            name: name,
+        });
+        let cube = new THREE.Mesh(geometry, material);
+        cube.position.x = xyz['x'];
+        cube.position.z = xyz['z'];
+        cube.position.y = parseInt(xyz['y']) + _game.yoffset;
+        scene.add(cube);
+        _game.isBoxAdded = true;
+
+        return cube;
+    }
+    getXYZByBoxname(boxname) {
+        const xindex = boxname.indexOf('x');
+        const yindex = boxname.indexOf('y');
+        const zindex = boxname.indexOf('z');
+
+        const x = boxname.substr(xindex+1, yindex-xindex-1);
+        const y = boxname.substr(yindex+1, zindex-yindex-1);
+        const z = boxname.substr(zindex+1);
+        return { x: x, y: y, z:z }
+    }
