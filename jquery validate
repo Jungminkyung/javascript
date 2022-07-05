@@ -1,0 +1,89 @@
+//jquery validate 예제 https://mytory.net/uploads/code/jquery-validate-demo.html
+    $(function() {
+        $.extend( $.validator.messages, {
+            required: "필수 항목입니다.",
+            remote: "항목을 수정하세요.",
+            email: "유효하지 않은 E-Mail주소입니다.",
+            url: "유효하지 않은 URL입니다.",
+            date: "올바른 날짜를 입력하세요.",
+            dateISO: "올바른 날짜(ISO)를 입력하세요.",
+            number: "유효한 숫자가 아닙니다.",
+            digits: "숫자만 입력 가능합니다.",
+            creditcard: "신용카드 번호가 바르지 않습니다.",
+            equalTo: "같은 값을 다시 입력하세요.",
+            extension: "올바른 확장자가 아닙니다.",
+            maxlength: $.validator.format( "{0}자를 넘을 수 없습니다. " ),
+            minlength: $.validator.format( "{0}자 이상 입력하세요." ),
+            rangelength: $.validator.format( "문자 길이가 {0} 에서 {1} 사이의 값을 입력하세요." ),
+            range: $.validator.format( "{0} 에서 {1} 사이의 값을 입력하세요." ),
+            max: $.validator.format( "{0} 이하의 값을 입력하세요." ),
+            min: $.validator.format( "{0} 이상의 값을 입력하세요." )
+        });
+    });
+    
+    
+    
+    $(document).ready(function(){
+        $('#signUpForm').validate({
+            rules: {
+                email : {
+                    required: true,
+                    email:true,
+                },
+                name : {
+                    required: true, // string?
+                },
+                password : {
+                    required: true,
+                    minlength:6
+                },
+                agree1 :{
+                    required: true
+                },
+                agree2 : {
+                    required: true
+                }
+            },
+            submitHandler : function(form) {
+                if(formfail) {
+                    alert(formfailmessage);
+                    return;
+                }
+                form.submit();
+            }
+            // 오류내용을 alert으로 출력하고싶을때 아래를 사용
+            // errorPlacement: function(err,element) {
+            //     if(element.is(":radio") || element.is(":checkbox")){
+            //         element.parent().after(err);
+            //         var text = err[0].innerText
+            //     } else {
+            //         var text = err[0].innerText
+            //         element.after(err);
+            //     }
+            // },
+        });
+    });
+    
+    
+    
+    
+
+
+- required : 필수 입력 엘리먼트입니다.
+- remote : 엘리먼트의 검증을 지정된 다른 자원에 ajax 로 요청합니다.
+- minlength : 최소 길이를 지정합니다.
+- maxlength : 최대 길이를 지정합니다
+.- rangelength : 길이의 범위를 지정합니다.
+- min : 최소값을 지정합니다.
+- max : 최대값을 지정합니다.
+- range : 값의 범위를 지정합니다.
+- step : 주어진 단계의 값을 가지도록 합니다.
+- email : 이메일 주소형식으 가지도록 합니다.
+- url : url 형식을 가지도록 합니다.
+- date : 날짜 형식을 가지도록 합니다.
+- dateISO : ISO 날짜 형식을 가지도록 합니다
+- number : 10진수를 가지도록 합니다.
+- digits : 숫자 형식을 가지도록 합니다.
+- equalTo : 엘리먼트가 다른 엘리먼트와 동일해야 합니다.
+출처: https://offbyone.tistory.com/50 [쉬고 싶은 개발자:티스토리]
+    
