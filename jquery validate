@@ -20,7 +20,14 @@
             min: $.validator.format( "{0} 이상의 값을 입력하세요." )
         });
     });
-    
+    $.validator.addMethod(
+        "regex",
+        function(value, element, regexp) {
+            var re = new RegExp(regexp);
+            return this.optional(element) || re.test(value);
+        },
+        "Please check your input."
+    );
     
     
     $(document).ready(function(){
@@ -64,6 +71,8 @@
         });
     });
     
+    //이름이 숫자로되어있을때 오류
+    $("#name").rules("add", { regex: "[^0-9]" })
     
     
     
@@ -86,4 +95,22 @@
 - digits : 숫자 형식을 가지도록 합니다.
 - equalTo : 엘리먼트가 다른 엘리먼트와 동일해야 합니다.
 출처: https://offbyone.tistory.com/50 [쉬고 싶은 개발자:티스토리]
+
+
+
+<style>
+    /* loadash error */
+    .invalid {
+        background-color:#DB3545 !important;
+        color:white !important;
+    }
+    /* jquery validate error */
+    input.error {
+        background-color:#DB3545 !important;
+        color:white !important;
+    }
+    label.error {
+        color:#ABCDEF;
+    }
+</style>
     
